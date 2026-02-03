@@ -55,7 +55,7 @@ export function Education() {
           </p>
         </div>
 
-        <div ref={contentRef} className="grid lg:grid-cols-2 gap-8">
+        <div ref={contentRef} className="grid grid-cols-1 gap-8 items-start">
           {/* Education */}
           <div className="space-y-6">
             <h3 className="font-display text-xl font-bold text-dark flex items-center gap-2">
@@ -118,7 +118,7 @@ export function Education() {
             </div>
 
             {/* Additional info card */}
-            <div className="edu-card p-6 bg-gradient-to-br from-orange/5 to-coral/5 rounded-2xl border border-orange/10">
+            {/* <div className="edu-card p-6 bg-gradient-to-br from-orange/5 to-coral/5 rounded-2xl border border-orange/10">
               <h4 className="font-display text-lg font-bold text-dark mb-2">
                 Always Learning
               </h4>
@@ -127,7 +127,7 @@ export function Education() {
                 and advanced React patterns. Committed to staying at the forefront 
                 of web development.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

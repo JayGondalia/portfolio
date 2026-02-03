@@ -52,6 +52,16 @@ export function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const extractEmailFromText = (text: string) => {
+    const match = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/i);
+    return match ? match[0] : null;
+  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -81,30 +91,52 @@ export function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
+    // Try to ensure we have a valid reply email. If the Email field is empty or invalid,
+    // attempt to extract an email address from the message text.
+    let emailToUse = (formData.email || '').trim();
+
+    if (!isValidEmail(emailToUse)) {
+      const extracted = extractEmailFromText(formData.message || '');
+      if (extracted) {
+        emailToUse = extracted;
+      } else {
+        setFormError(
+          'Please include a valid email address in the Email field or in your message so I can reply.'
+        );
+        return;
+      }
+    }
+
     setIsSubmitting(true);
-    
+
     try {
       // Using Formspree for form submission - replace with your Formspree endpoint
-      const response = await fetch('https://formspree.io/f/xnqebkoo', {
+      const response = await fetch('https://formspree.io/f/xojlrkkv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: formData.name,
-          email: formData.email,
-          message: formData.message,
+          email: emailToUse,
+          message:
+            formData.message +
+            (emailToUse !== (formData.email || '').trim()
+              ? `\n\n(Detected reply email: ${emailToUse})`
+              : ''),
         }),
       });
-      
+
       if (response.ok) {
         setSubmitted(true);
         setFormData({ name: '', email: '', message: '' });
       } else {
-        alert('Something went wrong. Please try again or email me directly.');
+        setFormError('Something went wrong. Please try again or email me directly.');
       }
     } catch (error) {
-      alert('Something went wrong. Please try again or email me directly.');
+      setFormError('Something went wrong. Please try again or email me directly.');
     } finally {
       setIsSubmitting(false);
     }
@@ -220,7 +252,6 @@ export function Contact() {
                         placeholder="your@email.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
                         className="h-12 bg-warm-cream/50 border-0 focus:ring-2 focus:ring-orange/20"
                       />
                     </div>
@@ -238,6 +269,9 @@ export function Contact() {
                       className="bg-warm-cream/50 border-0 focus:ring-2 focus:ring-orange/20 resize-none"
                     />
                   </div>
+                  {formError && (
+                    <p className="text-sm text-red-600">{formError}</p>
+                  )}
                   <Button
                     type="submit"
                     disabled={isSubmitting}
